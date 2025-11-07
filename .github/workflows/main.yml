@@ -34,6 +34,7 @@ jobs:
           echo "🔗 Calling: https://tst1.xo.je/wp-cron.php?doing_wp_cron%20%3E%20/dev/null%202%3E&1"
           response2=$(curl -s -k -L -w "%{http_code}" -o /tmp/response2.txt "https://tst1.xo.je/wp-cron.php?doing_wp_cron%20%3E%20/dev/null%202%3E&1" || echo "curl_failed")
           echo "Response code: $response2"
+        
           
           # Debug info for second call
           if [ "$response2" = "curl_failed" ]; then
