@@ -1,9 +1,7 @@
 name: WordPress Cron Runner
 on:
   schedule:
-    # Runs every 5 minutes - UTC time
     - cron: '*/5 * * * *'
-  # Optional: Also run when you manually trigger it
   workflow_dispatch:
 
 jobs:
@@ -13,23 +11,39 @@ jobs:
       - name: Execute WordPress Cron Jobs
         run: |
           echo "🚀 Starting WordPress cron execution - $(date)"
+          echo "=============================================="
           
-          # First URL with detailed logging
+          # First URL with SSL bypass and better error handling
           echo "🔗 Calling: https://tst1.xo.je/?wp_automatic=cron"
-          response1=$(curl -s -o /dev/null -w "%{http_code}" "https://tst1.xo.je/?wp_automatic=cron")
-          echo "✅ First cron completed - Status: $response1"
+          response1=$(curl -s -k -L -w "%{http_code}" -o /tmp/response1.txt "https://tst1.xo.je/?wp_automatic=cron" || echo "curl_failed")
+          echo "Response code: $response1"
           
-          # Wait 5 seconds between calls
+          # Debug info for first call
+          if [ "$response1" = "curl_failed" ]; then
+            echo "❌ First URL failed completely"
+          else
+            echo "✅ First URL HTTP Status: $response1"
+          fi
+          
+          # Wait 5 seconds
           echo "⏳ Waiting 5 seconds..."
           sleep 5
+          echo "----------------------------------------------"
           
-          # Second URL with detailed logging  
+          # Second URL with SSL bypass and better error handling
           echo "🔗 Calling: https://tst1.xo.je/wp-cron.php?doing_wp_cron%20%3E%20/dev/null%202%3E&1"
-          response2=$(curl -s -o /dev/null -w "%{http_code}" "https://tst1.xo.je/wp-cron.php?doing_wp_cron%20%3E%20/dev/null%202%3E&1")
-          echo "✅ Second cron completed - Status: $response2"
+          response2=$(curl -s -k -L -w "%{http_code}" -o /tmp/response2.txt "https://tst1.xo.je/wp-cron.php?doing_wp_cron%20%3E%20/dev/null%202%3E&1" || echo "curl_failed")
+          echo "Response code: $response2"
           
-          echo "🎉 Both cron jobs executed successfully!"
-          echo "📊 Summary:"
-          echo "   First URL: HTTP $response1"
-          echo "   Second URL: HTTP $response2"
-          echo "   Execution time: $(date)"
+          # Debug info for second call
+          if [ "$response2" = "curl_failed" ]; then
+            echo "❌ Second URL failed completely"
+          else
+            echo "✅ Second URL HTTP Status: $response2"
+          fi
+          
+          echo "=============================================="
+          echo "🎉 Cron execution completed at: $(date)"
+          echo "📊 Final Summary:"
+          echo "   First URL: $response1"
+          echo "   Second URL: $response2"
