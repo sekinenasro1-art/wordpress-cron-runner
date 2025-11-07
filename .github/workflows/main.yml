@@ -1,0 +1,35 @@
+name: WordPress Cron Runner
+on:
+  schedule:
+    # Runs every 5 minutes - UTC time
+    - cron: '*/5 * * * *'
+  # Optional: Also run when you manually trigger it
+  workflow_dispatch:
+
+jobs:
+  run-cron:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Execute WordPress Cron Jobs
+        run: |
+          echo "🚀 Starting WordPress cron execution - $(date)"
+          
+          # First URL with detailed logging
+          echo "🔗 Calling: https://tst1.xo.je/?wp_automatic=cron"
+          response1=$(curl -s -o /dev/null -w "%{http_code}" "https://tst1.xo.je/?wp_automatic=cron")
+          echo "✅ First cron completed - Status: $response1"
+          
+          # Wait 5 seconds between calls
+          echo "⏳ Waiting 5 seconds..."
+          sleep 5
+          
+          # Second URL with detailed logging  
+          echo "🔗 Calling: https://tst1.xo.je/wp-cron.php?doing_wp_cron%20%3E%20/dev/null%202%3E&1"
+          response2=$(curl -s -o /dev/null -w "%{http_code}" "https://tst1.xo.je/wp-cron.php?doing_wp_cron%20%3E%20/dev/null%202%3E&1")
+          echo "✅ Second cron completed - Status: $response2"
+          
+          echo "🎉 Both cron jobs executed successfully!"
+          echo "📊 Summary:"
+          echo "   First URL: HTTP $response1"
+          echo "   Second URL: HTTP $response2"
+          echo "   Execution time: $(date)"
